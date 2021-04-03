@@ -1,0 +1,3 @@
+[submodule "utopia-entities"]
+	path = utopia-entities
+	url = git@github.com:UtopiaCaid/utopia-entities.git

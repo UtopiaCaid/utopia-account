@@ -3,11 +3,11 @@ package com.caid.utopia;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
-public class UtopiaApplication {
+@SpringBootApplication(scanBasePackages = "com.caid.utopia")
+public class UtopiaAccountApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(UtopiaApplication.class, args);
+		SpringApplication.run(UtopiaAccountApplication.class, args);
 	}
 
 }
