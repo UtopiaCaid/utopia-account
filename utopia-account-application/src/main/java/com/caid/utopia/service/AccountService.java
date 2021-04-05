@@ -24,65 +24,83 @@ import com.caid.utopia.repo.AccountRepo;
 
 @Service
 public class AccountService {
-	
+
 	@Autowired
 	AccountRepo accountRepo;
-	
+
 	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	@Autowired
 	RestTemplate restTemplate;
-	
-	public Account getAccountById(Integer accountNumber, String jwtToken){
+
+	public Account getAccountById(Integer accountNumber, String jwtToken) {
 
 		Account loggedInAccount = getLoggedInAccountByJWT(jwtToken);
 		if ("ROLE_ADMIN".equals(loggedInAccount.getRole().getRoleType())
-				|| accountNumber == loggedInAccount.getAccountNumber()) {		
-			logger.info("AccountService.GetAccountById: Logged in account has been located user: {}", loggedInAccount.getUsername());
+				|| accountNumber == loggedInAccount.getAccountNumber()) {
+			logger.info("AccountService.GetAccountById: Logged in account has been located user: {}",
+					loggedInAccount.getUsername());
 		} else {
 			throw new AuthorizationException();
 		}
 
 		return accountRepo.findById(accountNumber).orElseThrow(() -> new AccountNotFoundException());
 	}
-	
+
 	public Account getAccountByUsername(String username) {
 		Optional<Account> account = accountRepo.findByUsername(username);
-		if(account.isPresent()) {
+		if (account.isPresent()) {
 			return account.get();
 		} else {
 			throw new AccountNotFoundException();
 		}
 	}
-	
-	//look into why this breaks with no filterString, possibly change the custom repo call when no string is provided
-	public List<Account> getUserAccounts(Optional<String> filterString) {
+
+	// look into why this breaks with no filterString, possibly change the custom
+	// repo call when no string is provided
+	public List<Account> getUserAccounts(Optional<String> filterString, String jwtToken) {
 		List<Account> accounts;
-		if(filterString.isPresent()) {
+		Account loggedInAccount = getLoggedInAccountByJWT(jwtToken);
+		if (!"ROLE_ADMIN".equals(loggedInAccount.getRole().getRoleType()))
+			throw new AuthorizationException();
+		if (filterString.isPresent()) {
 			accounts = accountRepo.getAllUsersWithFilter(filterString.get());
-		}else {
+		} else {
 			accounts = accountRepo.getAllUsers();
 		}
-		if(accounts.size() == 0) throw new AccountNotFoundException();
-		return accounts;
-	}
-	
-	public List<Account> getAdminAccounts(Optional<String> filterString) {
-		List<Account> accounts;
-		if(filterString.isPresent()) {
-			accounts = accountRepo.getAllAdminsWithFilter(filterString.get());
-		}else {
-			accounts = accountRepo.getAllAdmins();
-		}
-		if(accounts.size() == 0) throw new AccountNotFoundException();
+		if (accounts.size() == 0)
+			throw new AccountNotFoundException();
 		return accounts;
 	}
 
-	public Account saveAccount(Account account) {
-		if(account.getEmail().length() > 45 || account.getUsername().length() > 45) {
+	public List<Account> getAdminAccounts(Optional<String> filterString, String jwtToken) {
+		List<Account> accounts;
+		Account loggedInAccount = getLoggedInAccountByJWT(jwtToken);
+		if (!"ROLE_ADMIN".equals(loggedInAccount.getRole().getRoleType()))
+			throw new AuthorizationException();
+		if (filterString.isPresent()) {
+			accounts = accountRepo.getAllAdminsWithFilter(filterString.get());
+		} else {
+			accounts = accountRepo.getAllAdmins();
+		}
+		if (accounts.size() == 0)
+			throw new AccountNotFoundException();
+		return accounts;
+	}
+
+	public Account saveAccount(Account account, String jwtToken) {
+		Account loggedInAccount = getLoggedInAccountByJWT(jwtToken);
+		if ("ROLE_ADMIN".equals(loggedInAccount.getRole().getRoleType())
+				|| account.getAccountNumber() == loggedInAccount.getAccountNumber()) {
+			logger.info("AccountService.saveAccount: Logged in account has been located user: {}",
+					loggedInAccount.getUsername());
+		} else {
+			throw new AuthorizationException();
+		}
+		if (account.getEmail().length() > 45 || account.getUsername().length() > 45) {
 			throw new OversizedValueException();
 		}
-		if(accountRepo.checkIfUsernameIsUsedBySomeoneElse(account.getUsername(), account.getAccountNumber())) {
+		if (accountRepo.checkIfUsernameIsUsedBySomeoneElse(account.getUsername(), account.getAccountNumber())) {
 			throw new DuplicateUsernameException();
 		}
 		return accountRepo.save(account);
@@ -97,18 +115,18 @@ public class AccountService {
 		// TODO Auto-generated method stub
 		Account loggedInAccount = getLoggedInAccountByJWT(jwtToken);
 		if ("ROLE_ADMIN".equals(loggedInAccount.getRole().getRoleType())
-				|| account.getAccountNumber() == loggedInAccount.getAccountNumber()) {		
-			logger.info("AccountService.GetAccountById: Logged in account has been located user: {}", loggedInAccount.getUsername());
+				|| account.getAccountNumber() == loggedInAccount.getAccountNumber()) {
+			logger.info("AccountService.GetAccountById: Logged in account has been located user: {}",
+					loggedInAccount.getUsername());
 		} else {
 			throw new AuthorizationException();
 		}
 		accountRepo.findById(account.getAccountNumber()).orElseThrow(() -> new AccountNotFoundException());
 		accountRepo.deactivateLoginForAccount(account.getAccountNumber());
-		
+
 	}
-	
-	public Account getLoggedInAccountByJWT(String jwtToken)
-	{
+
+	public Account getLoggedInAccountByJWT(String jwtToken) {
 		logger.info("getLoggedInAccountByJWT: Checking if loggedIn Account has correct permissions.");
 		logger.info("getLoggedInAccountByJWT: Token Value: {}", jwtToken);
 		HttpHeaders headers = new HttpHeaders();

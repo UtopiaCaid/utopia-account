@@ -22,7 +22,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ApplicationExceptionController extends ResponseEntityExceptionHandler {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	@Override
 	@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
@@ -30,7 +30,7 @@ public class ApplicationExceptionController extends ResponseEntityExceptionHandl
 		List<String> errorMessages = new ArrayList<String>();
 		logger.error("Method Argument Not Valid");
 		for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
-			logger.error("Field: {}, Field Error Message: {}", fieldError.getField(),fieldError.getDefaultMessage());
+			logger.error("Field: {}, Field Error Message: {}", fieldError.getField(), fieldError.getDefaultMessage());
 			errorMessages.add(fieldError.getField() + fieldError.getDefaultMessage());
 		}
 		return ResponseEntity.unprocessableEntity().body(errorMessages);
@@ -51,30 +51,37 @@ public class ApplicationExceptionController extends ResponseEntityExceptionHandl
 		logWebRequestParameters(request);
 		return new ResponseEntity<>("Entity Field value was too large for the DB", HttpStatus.PAYLOAD_TOO_LARGE);
 	}
-	
+
 	@ExceptionHandler(value = DuplicateUsernameException.class)
-	@ResponseStatus(HttpStatus.PAYLOAD_TOO_LARGE)
+	@ResponseStatus(HttpStatus.CONFLICT)
 	public ResponseEntity<Object> exception(DuplicateUsernameException exception, WebRequest request) {
 		logger.error("The Username provided is already in use please select another", exception);
 		logWebRequestParameters(request);
-		return new ResponseEntity<>("The Username provided is already in use please select another", HttpStatus.PAYLOAD_TOO_LARGE);
+		return new ResponseEntity<>("The Username provided is already in use please select another",
+				HttpStatus.CONFLICT);
 	}
-	
+
 	@ExceptionHandler(value = AuthorizationException.class)
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public ResponseEntity<Object> exception(AuthorizationException exception, WebRequest request) {
 		logger.error("You do not have the level of access required for this resource", exception);
 		logWebRequestParameters(request);
-		return new ResponseEntity<>("You do not have the level of access required for this resource", HttpStatus.UNAUTHORIZED);
+		return new ResponseEntity<>("You do not have the level of access required for this resource",
+				HttpStatus.UNAUTHORIZED);
 	}
-	
+
 	@ExceptionHandler(RestClientException.class)
 	@ResponseStatus(HttpStatus.FAILED_DEPENDENCY)
 	public ResponseEntity<Object> exception(RestClientException exception, WebRequest request) {
-		logger.error("RestClientException: This request required another request to be processed but the subsequent request could not completed.", exception);
+		logger.error(
+				"RestClientException: This request required another request to be processed but the subsequent request could not completed.",
+				exception);
 		logWebRequestParameters(request);
-		return new ResponseEntity<>("This request required another request to be processed but the subsequent request could not completed.", HttpStatus.UNAUTHORIZED);
+		return new ResponseEntity<>(
+				"This request required another request to be processed but the subsequent request could not completed.",
+				HttpStatus.UNAUTHORIZED);
 	}
+
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ResponseEntity<Object> handleAllUncaughtException(RuntimeException exception, WebRequest request) {
@@ -83,7 +90,7 @@ public class ApplicationExceptionController extends ResponseEntityExceptionHandl
 		return new ResponseEntity<>("An unexpected untracked exception has occured please notify an Admin",
 				HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-	
+
 	public void logWebRequestParameters(WebRequest request) {
 		Map<String, String[]> requestParams = request.getParameterMap();
 		requestParams.forEach((key, value) -> logger.error("Request Parameter: {}, Parameter Value: {}", key, value));
