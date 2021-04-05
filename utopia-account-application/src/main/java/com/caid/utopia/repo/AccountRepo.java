@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -31,6 +32,7 @@ public interface AccountRepo extends JpaRepository<Account, Integer>{
 	@Query("SELECT case WHEN COUNT(a)>0 THEN true ELSE false END FROM Account a WHERE lower(a.username) like lower(:usernameToCheck) AND a.accountNumber <> :idToIgnore")	
 	boolean checkIfUsernameIsUsedBySomeoneElse(@Param("usernameToCheck") String userName, @Param("idToIgnore") Integer id);
 
+	@Modifying
 	@Query("UPDATE Account a SET a.username=null, a.email=null, a.password=null WHERE a.accountNumber=:accountNumber")
 	void deactivateLoginForAccount(@Param("accountNumber")Integer accountNumber);
 

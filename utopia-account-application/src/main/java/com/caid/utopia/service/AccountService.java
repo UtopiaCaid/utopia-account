@@ -33,21 +33,9 @@ public class AccountService {
 	@Autowired
 	RestTemplate restTemplate;
 	
-	public Account getAccountById(Integer accountNumber, String token){
-		logger.info("GetAccountById: Checking if loggedIn Account has correct permissions.");
-		logger.info("GetAccountById: Token Value: {}", token);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		headers.add("Authorization", token);
-		if (!token.contains("Bearer"))
-			throw new AuthorizationException();
-		HttpEntity<Account> entity = new HttpEntity<Account>(headers);
-		ResponseEntity<Account> accountResponseEntity = restTemplate
-				.exchange("http://utopiaauthentication/getSecurityAccount", HttpMethod.GET, entity, Account.class);
-//		Check for role then return account if role is admin or is user and the id matched with that of the token
-		Account loggedInAccount = accountResponseEntity.getBody();
-		logger.info("GetAccountById: Account making the request: {}, ", loggedInAccount.getUsername());
-		loggedInAccount = getAccountByUsername(loggedInAccount.getUsername());
+	public Account getAccountById(Integer accountNumber, String jwtToken){
+
+		Account loggedInAccount = getLoggedInAccountByJWT(jwtToken);
 		if ("ROLE_ADMIN".equals(loggedInAccount.getRole().getRoleType())
 				|| accountNumber == loggedInAccount.getAccountNumber()) {		
 			logger.info("AccountService.GetAccountById: Logged in account has been located user: {}", loggedInAccount.getUsername());
@@ -105,10 +93,35 @@ public class AccountService {
 		accountRepo.deleteById(account.getAccountNumber());
 	}
 
-	public void deactivateAccount(Account account) {
+	public void deactivateAccount(Account account, String jwtToken) {
 		// TODO Auto-generated method stub
+		Account loggedInAccount = getLoggedInAccountByJWT(jwtToken);
+		if ("ROLE_ADMIN".equals(loggedInAccount.getRole().getRoleType())
+				|| account.getAccountNumber() == loggedInAccount.getAccountNumber()) {		
+			logger.info("AccountService.GetAccountById: Logged in account has been located user: {}", loggedInAccount.getUsername());
+		} else {
+			throw new AuthorizationException();
+		}
 		accountRepo.findById(account.getAccountNumber()).orElseThrow(() -> new AccountNotFoundException());
 		accountRepo.deactivateLoginForAccount(account.getAccountNumber());
 		
+	}
+	
+	public Account getLoggedInAccountByJWT(String jwtToken)
+	{
+		logger.info("getLoggedInAccountByJWT: Checking if loggedIn Account has correct permissions.");
+		logger.info("getLoggedInAccountByJWT: Token Value: {}", jwtToken);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+		headers.add("Authorization", jwtToken);
+		if (!jwtToken.contains("Bearer"))
+			throw new AuthorizationException();
+		HttpEntity<Account> entity = new HttpEntity<Account>(headers);
+		ResponseEntity<Account> accountResponseEntity = restTemplate
+				.exchange("http://utopiaauthentication/getSecurityAccount", HttpMethod.GET, entity, Account.class);
+//		Check for role then return account if role is admin or is user and the id matched with that of the jwtToken
+		Account loggedInAccount = accountResponseEntity.getBody();
+		logger.info("getLoggedInAccountByJWT: Account making the request: {}, ", loggedInAccount.getUsername());
+		return getAccountByUsername(loggedInAccount.getUsername());
 	}
 }

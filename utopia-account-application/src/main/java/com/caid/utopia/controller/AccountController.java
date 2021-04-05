@@ -70,10 +70,10 @@ public class AccountController {
 	// pass the account Number in the path and then add it to the account before
 	// passing it to the service.Don't expect is as part of the RequestBody
 	@RequestMapping(path = "/{accountNumber}", method = RequestMethod.DELETE, consumes = "application/json") //
-	public ResponseEntity<Object> deleteAccount(@RequestBody Account account, @PathVariable Integer accountNumber) {
+	public ResponseEntity<Object> deleteAccount(@RequestBody Account account, @PathVariable Integer accountNumber, @RequestHeader(name = "Authorization") String jwtToken) {
 		account.setAccountNumber(accountNumber);
-		accountService.deactivateAccount(account);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		accountService.deactivateAccount(account, jwtToken);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 //	public static void main(String[] args) {
 //		SpringApplication.run(AccountController.class, args);
