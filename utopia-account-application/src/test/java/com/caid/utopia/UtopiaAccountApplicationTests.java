@@ -21,13 +21,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 public abstract class UtopiaAccountApplicationTests {
 
 	protected MockMvc mvc;
-	
+
 	@Autowired
 	ObjectMapper objectMapper;
-	
+
 	@Autowired
 	WebApplicationContext webApplicationContext;
-	
+
 	protected void setUp() {
 		mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 	}
@@ -42,7 +42,7 @@ public abstract class UtopiaAccountApplicationTests {
 		objectMapper.registerModule(new JavaTimeModule());
 		return objectMapper.readValue(json, clazz);
 	}
-	
+
 	@Test
 	void contextLoads() {
 	}

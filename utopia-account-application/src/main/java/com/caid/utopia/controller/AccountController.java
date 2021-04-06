@@ -6,8 +6,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -43,16 +41,18 @@ public class AccountController {
 
 	@GetMapping(path = "/users", produces = "application/json")
 	public ResponseEntity<List<Account>> getUserAccountsWithFilter(
-			@RequestParam(required = false) Optional<String> nameFilter) {
-		List<Account> accounts = accountService.getUserAccounts(nameFilter);
+			@RequestParam(required = false) Optional<String> nameFilter,
+			@RequestHeader(name = "Authorization") String token) {
+		List<Account> accounts = accountService.getUserAccounts(nameFilter, token);
 		logger.info("User Accounts have been found");
 		return new ResponseEntity<List<Account>>(accounts, HttpStatus.OK);
 	}
 
 	@GetMapping(path = "/admins", produces = "application/json")
 	public ResponseEntity<List<Account>> getAdminAccountsWithFilter(
-			@RequestParam(required = false) Optional<String> nameFilter) {
-		List<Account> accounts = accountService.getAdminAccounts(nameFilter);
+			@RequestParam(required = false) Optional<String> nameFilter,
+			@RequestHeader(name = "Authorization") String token) {
+		List<Account> accounts = accountService.getAdminAccounts(nameFilter, token);
 		logger.info("User Account have been found");
 		return new ResponseEntity<List<Account>>(accounts, HttpStatus.OK);
 	}
@@ -60,9 +60,10 @@ public class AccountController {
 	// pass the account Number in the path and then add it to the account before
 	// passing it to the service. Don't expect is as part of the RequestBody
 	@RequestMapping(path = "/{accountNumber}", method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
-	public ResponseEntity<Account> updateAccount(@RequestBody Account account, @PathVariable Integer accountNumber) {
+	public ResponseEntity<Account> updateAccount(@RequestBody Account account, @PathVariable Integer accountNumber,
+			@RequestHeader(name = "Authorization") String token) {
 		account.setAccountNumber(accountNumber);
-		account = accountService.saveAccount(account);
+		account = accountService.saveAccount(account, token);
 		logger.info("Successfully Updated Account");
 		return new ResponseEntity<Account>(account, HttpStatus.OK);
 	}
@@ -70,7 +71,8 @@ public class AccountController {
 	// pass the account Number in the path and then add it to the account before
 	// passing it to the service.Don't expect is as part of the RequestBody
 	@RequestMapping(path = "/{accountNumber}", method = RequestMethod.DELETE, consumes = "application/json") //
-	public ResponseEntity<Object> deleteAccount(@RequestBody Account account, @PathVariable Integer accountNumber, @RequestHeader(name = "Authorization") String jwtToken) {
+	public ResponseEntity<Object> deactivateAccount(@RequestBody Account account, @PathVariable Integer accountNumber,
+			@RequestHeader(name = "Authorization") String jwtToken) {
 		account.setAccountNumber(accountNumber);
 		accountService.deactivateAccount(account, jwtToken);
 		return new ResponseEntity<>(HttpStatus.OK);
