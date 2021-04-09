@@ -19,7 +19,7 @@ pipeline {
                     sh "cat .gitmodules"
                     sh "cat .git/config"
                     sh "sed 's,git@github.com:UtopiaCaid/utopia-entities.git,https://github.com/UtopiaCaid/utopia-entities.git,;' .gitmodules"
-                    sh "sed 's/git@github.com:UtopiaCaid/utopia-entities.git/https://github.com/UtopiaCaid/utopia-entities.git/;' .git/config"
+                    sh "sed 's,git@github.com:UtopiaCaid/utopia-entities.git,https://github.com/UtopiaCaid/utopia-entities.git,' .git/config"
                     sh 'git submodule update'
                     sh "mvn clean package -DskipTests"
                 }
