@@ -15,6 +15,8 @@ pipeline {
                 echo 'Building..'
 
                 script {
+                    sh "git submodule init"
+                    sh 'git submodule update'
                     sh "mvn clean package -DskipTests"
                 }
             }
