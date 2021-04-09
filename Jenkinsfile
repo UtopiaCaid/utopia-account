@@ -17,7 +17,7 @@ pipeline {
                 script {
                     sh "git submodule init"
                     sh "cat .gitmodules"
-                    sj "cat .git/config"
+                    sh "cat .git/config"
                     sh 'git submodule update'
                     sh "mvn clean package -DskipTests"
                 }
