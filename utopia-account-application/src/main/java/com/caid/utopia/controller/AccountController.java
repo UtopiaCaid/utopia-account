@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.caid.utopia.entity.Account;
+import com.caid.utopia.entity.Traveler;
 import com.caid.utopia.service.AccountService;
+import com.caid.utopia.service.TravelerService;
 
 //@SpringBootApplication(scanBasePackages = "com.caid.utopia")
 @CrossOrigin(origins = "${message.origin}")
@@ -31,6 +33,9 @@ public class AccountController {
 
 	@Autowired
 	AccountService accountService;
+
+	@Autowired
+	TravelerService travelerService;
 
 	@GetMapping(path = "/{accountNumber}", produces = "application/json")
 	public ResponseEntity<Account> getAccountsById(@PathVariable Integer accountNumber,
@@ -57,8 +62,6 @@ public class AccountController {
 		return new ResponseEntity<List<Account>>(accounts, HttpStatus.OK);
 	}
 
-	// pass the account Number in the path and then add it to the account before
-	// passing it to the service. Don't expect is as part of the RequestBody
 	@RequestMapping(path = "/{accountNumber}", method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
 	public ResponseEntity<Account> updateAccount(@RequestBody Account account, @PathVariable Integer accountNumber,
 			@RequestHeader(name = "Authorization") String token) {
@@ -68,8 +71,6 @@ public class AccountController {
 		return new ResponseEntity<Account>(account, HttpStatus.OK);
 	}
 
-	// pass the account Number in the path and then add it to the account before
-	// passing it to the service.Don't expect is as part of the RequestBody
 	@RequestMapping(path = "/{accountNumber}", method = RequestMethod.DELETE, consumes = "application/json") //
 	public ResponseEntity<Object> deactivateAccount(@RequestBody Account account, @PathVariable Integer accountNumber,
 			@RequestHeader(name = "Authorization") String jwtToken) {
@@ -77,7 +78,36 @@ public class AccountController {
 		accountService.deactivateAccount(account, jwtToken);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-//	public static void main(String[] args) {
-//		SpringApplication.run(AccountController.class, args);
-//	}
+
+	@GetMapping(path = "/{accountNumber}/travelers")
+	public ResponseEntity<List<Traveler>> getTravelersForAccount(@PathVariable Integer accountNumber,
+			@RequestHeader(name = "Authorization") String jwtToken) {
+		List<Traveler> travelers = travelerService.getTravelersForAccount(accountNumber, jwtToken);
+		return new ResponseEntity<List<Traveler>>(travelers, HttpStatus.OK);
+	}
+
+	@RequestMapping(path = "/{accountNumber}/travelers", method = RequestMethod.POST, consumes = "application/json")
+	public ResponseEntity<Traveler> postNewTraveler(@PathVariable Integer accountNumber, @RequestBody Traveler traveler,
+			@RequestHeader(name = "Authorization") String jwtToken) {
+		traveler = travelerService.saveTraveler(accountNumber, traveler, jwtToken);
+		return new ResponseEntity<Traveler>(traveler, HttpStatus.CREATED);
+	}
+
+	@RequestMapping(path = "/{accountNumber}/travelers/{travelerId}", method = RequestMethod.PUT, consumes = "application/json", produces = "application/json")
+	public ResponseEntity<Traveler> updateTravelerForAccount(@PathVariable Integer accountNumber,
+			@PathVariable Integer travelerId, @RequestBody Traveler traveler,
+			@RequestHeader(name = "Authorization") String jwtToken) {
+		traveler.setTravelerId(travelerId);
+		traveler = travelerService.saveTraveler(accountNumber, traveler, jwtToken);
+		return new ResponseEntity<Traveler>(traveler, HttpStatus.OK);
+	}
+
+	@RequestMapping(path = "/{accountNumber/travelers/{travelerId}", method = RequestMethod.DELETE, consumes = "application/json", produces = "application/json")
+	public ResponseEntity<Object> deleteTravelerForAccount(@PathVariable Integer accountNumber,
+			@PathVariable Integer travelerId, @RequestBody Traveler traveler,
+			@RequestHeader(name = "Authorization") String jwtToken) {
+		traveler.setTravelerId(travelerId);
+		travelerService.deleteTraveler(accountNumber, traveler, jwtToken);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 }

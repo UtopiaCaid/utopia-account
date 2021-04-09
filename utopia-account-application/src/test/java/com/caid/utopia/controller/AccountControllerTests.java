@@ -75,7 +75,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		expectedAccount.setUsername("defaultusername");
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc.perform(
@@ -93,7 +93,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/3";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc.perform(
@@ -114,7 +114,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		expectedAccount.setUsername("defaultusername");
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInUser), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc.perform(
@@ -130,7 +130,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/1";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInUser), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.get(uri).headers(jwtMockHeaders)).andReturn();
@@ -146,7 +146,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/3";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		HttpHeaders unauthenticatedHeaders = new HttpHeaders();
@@ -166,7 +166,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/users";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		HttpHeaders unauthenticatedHeaders = new HttpHeaders();
@@ -186,7 +186,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/users/?nameFilter=user";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		HttpHeaders unauthenticatedHeaders = new HttpHeaders();
@@ -206,7 +206,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/users";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInUser), MediaType.APPLICATION_JSON));
 
 		HttpHeaders unauthenticatedHeaders = new HttpHeaders();
@@ -227,7 +227,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/users/?nameFilter=adlkahbsdnfgjlamhsbdkjlacxsb";// Assumed to never be a username
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		HttpHeaders unauthenticatedHeaders = new HttpHeaders();
@@ -247,7 +247,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/admins";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		HttpHeaders unauthenticatedHeaders = new HttpHeaders();
@@ -267,7 +267,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/admins/?nameFilter=admin";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		HttpHeaders unauthenticatedHeaders = new HttpHeaders();
@@ -287,7 +287,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/admins";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInUser), MediaType.APPLICATION_JSON));
 
 		HttpHeaders unauthenticatedHeaders = new HttpHeaders();
@@ -307,7 +307,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/admins/?nameFilter=adlkahbsdnfgjlamhsbdkjlacxsb";// Assumed to never be a username
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		HttpHeaders unauthenticatedHeaders = new HttpHeaders();
@@ -339,7 +339,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		accountToUpdate.setPassword("password");
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc
@@ -371,7 +371,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		accountToUpdate.setEmail("updated@example.com");
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc
@@ -399,7 +399,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		accountToUpdate.setEmail("updated@example.com");
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc
@@ -427,7 +427,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		accountToUpdate.setEmail("ThisNameIsTooLongToBeUsedInOurDatabaseCashMoneyTesting");// More than 45 characters
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc
@@ -455,7 +455,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		accountToUpdate.setEmail("updated@example.com");
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInUser), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc
@@ -487,7 +487,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		accountToUpdate.setEmail("updated@example.com");
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInUser), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc
@@ -506,7 +506,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/1";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc.perform(
@@ -524,7 +524,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/0";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInAdmin), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc.perform(
@@ -542,7 +542,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/-1";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInUser), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc.perform(
@@ -560,7 +560,7 @@ public class AccountControllerTests extends UtopiaAccountApplicationTests {
 		String uri = "/accounts/1";
 
 		mockServer = MockRestServiceServer.createServer(restTemplate);
-		mockServer.expect(requestTo("http://utopiaauthentication/getSecurityAccount"))
+		mockServer.expect(requestTo("http://utopiaauthentication/authentication"))
 				.andRespond(withSuccess(mapToJson(loggedInUser), MediaType.APPLICATION_JSON));
 
 		MvcResult mvcResult = mvc.perform(
