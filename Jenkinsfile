@@ -24,6 +24,7 @@ pipeline {
         UTOPIA_PRIVATE_SUBNET_1 = "${sh(script:'echo $AWS_SECRET_VPC | jq -r \'. | .UTOPIA_PRIVATE_SUBNET_1 \'', returnStdout: true)}"
         /* groovylint-disable-next-line LineLength */
         UTOPIA_PUBLIC_VPC_ID = "${sh(script:'echo $AWS_SECRET_VPC | jq -r \'. | .UTOPIA_PUBLIC_VPC_ID \'', returnStdout: true)}"
+
     }
     tools {
         maven 'Maven 3.6.3'
@@ -34,7 +35,13 @@ pipeline {
                 echo 'Building..'
 
                 script {
-                    sh 'mvn clean package -DskipTests'
+                    sh "git submodule init"
+                    sh "sed -i 's,git@github.com:UtopiaCaid/utopia-entities.git,https://github.com/UtopiaCaid/utopia-entities.git,;' .gitmodules"
+                    sh "sed -i 's,git@github.com:UtopiaCaid/utopia-entities.git,https://github.com/UtopiaCaid/utopia-entities.git,' .git/config" 
+                    sh "cat .gitmodules"
+                    sh "cat .git/config"
+                    sh 'git submodule update'
+                    sh "mvn clean package -DskipTests"
                 }
             }
         }
