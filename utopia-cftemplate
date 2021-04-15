@@ -1,0 +1,227 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Utopia Airlines Demo Project Microservices Template.
+# Used to pass parameters from cli to CloudFormation. e.g. You can pass the Environment you are deploying to.
+# This is useful to implement conditions.
+Parameters:
+  ApplicationEnvironment:
+    Type: String
+    Default: dev
+  ApplicationName:
+    Type: String
+    Default: UtopiaMSNameNotSet
+  # RDS Connection Values
+  DBUrl:
+    Type: String
+  DBPassword:
+    Type: String
+  DBUsername:
+    Type: String
+  # URI of Elastic Container Repository containing the latest Build Image
+  # Looks like: ${AWS_ID}/MyRepositoryProjectFolder/MyServive:${COMMIT_HASH}
+  ECRepositoryUri:
+    Type: String
+    Description: Full URI of Docker Image to run in container
+  # ECS Cluster Arn where the Service will run
+  # Looks like : arn:aws:ecs:us-east-2:499898275313:cluster/<name-of-cluster>
+  ECSCluster:
+    Type: String
+    Description: Arn of the cluster where the service will exist.
+    # ARN of the Service's Execution Role (requires all read/write permissions of service needed)
+  # Looks like: "arn:aws:iam::${AWS_ID}:role/MyTaskExecutionRole"
+  ExecutionRoleArn:
+    Type: String
+  # ID of the Subnet within the VPC to deploy to (should be private)
+  # Looks like: "subnet-56ebde1b"
+  SubnetID:
+    Type: String
+  # ARN of the TargetGroup pointing to this service's Load Balancer
+  # Looks like: "arn:aws:elasticloadbalancing:us-east-1:${AWS_ID}:targetgroup/MyServiceTargetGroup/b410a0a203b09ac6"
+  TargetGroupArnDev:
+    Type: String
+  TargetGroupArnProd:
+    Type: String
+  # ID of the Virtual Private Cloud this Deployment is contained in
+  # Looks like: "vpc-05060d52e0ec4513c"
+  VpcId:
+    Type: String
+  InstanceType:
+    Description: WebServer EC2 instance type
+    Type: String
+    Default: t2.small
+    AllowedValues:
+      - t1.micro
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+    ConstraintDescription: must be a valid EC2 instance type.
+  SSHLocation:
+    Description: The IP address range that can be used to SSH to the EC2 instances
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 0.0.0.0/0
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    
+Conditions:
+  ProductionBuild: !Equals [!Ref ApplicationEnvironment, prod]
+  AccountMS: !Equals [!Ref ApplicationName, UtopiaAccountMS]
+  AdminMS: !Equals [!Ref ApplicationName, UtopiaAdminMS]
+  AuthenticationMS: !Equals [!Ref ApplicationName, UtopiaAuthenticationMS]
+  EurekaMS: !Equals [!Ref ApplicationName, UtopiaEurekaMS]
+  OrchestratorMS: !Equals [!Ref ApplicationName, UtopiaOrchestratorMS]
+  #PassengerMS: !Equals [!Ref ApplicationName, UtopiaPassengerMS]
+  #PaymentMS: !Equals [!Ref ApplicationName, UtopiaPaymentMS]
+  #RouteMS: !Equals [!Ref ApplicationName, UtopiaRouteMS]
+  #UserMS: !Equals [!Ref ApplicationName, UtopiaUserMS]
+      
+Resources:
+  ServicesSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Join ["", ["Ports open for: ", !Ref ApplicationName]]
+      GroupName: !Join ["-", [!Ref ApplicationName, "SG"]]
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort:
+            !If [AccountMS, 8070,
+            !If [AdminMS, 8072,
+            !If [AuthenticationMS, 8071,
+            !If [EurekaMS, 8761,
+            !If [OrchestratorMS, 8080, 
+            80]]]]]
+          ToPort:
+            !If [AccountMS, 8070,
+            !If [AdminMS, 8072,
+            !If [AuthenticationMS, 8071,
+            !If [EurekaMS, 8761,
+            !If [OrchestratorMS, 8080, 
+            80]]]]]
+          CidrIp: 0.0.0.0/0
+  
+  # Fargate Service
+  AppService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Ref ApplicationName
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref AppTaskDefinition
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 100
+        MaximumPercent: 200
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: !Join ["-", [!Ref ApplicationName, "Container"]]
+          ContainerPort:
+            !If [AccountMS, 8070,
+            !If [AdminMS, 8072,
+            !If [AuthenticationMS, 8071,
+            !If [EurekaMS, 8761,
+            !If [OrchestratorMS, 8080, 
+            80]]]]]
+          TargetGroupArn: !If [ProductionBuild, !Ref TargetGroupArnProd, !Ref TargetGroupArnDev]
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets:
+            - !Ref SubnetID
+          SecurityGroups:
+            - !Ref ServicesSecurityGroup
+  
+  #IAM for application container (task)
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ECS-TaskExecutionRole-${ApplicationName}-${ApplicationEnvironment}
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Tags:
+        - Key: ApplicationName
+          Value: !Ref ApplicationName
+        - Key: ApplicationEnvironment
+          Value: !Ref ApplicationEnvironment
+
+  # Fargate Task Definition
+  AppTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub ${ApplicationName}-${ApplicationEnvironment}
+      RequiresCompatibilities:
+        - FARGATE
+      Memory: "2048"
+      Cpu: "256"
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !Sub ${ExecutionRoleArn}
+      TaskRoleArn: !Ref TaskExecutionRole
+      ContainerDefinitions:
+        - Name: !Join ["-", [!Ref ApplicationName, "Container"]]
+          Image: !Ref ECRepositoryUri
+          PortMappings:
+            - ContainerPort:
+                !If [AccountMS, 8070,
+                !If [AdminMS, 8072,
+                !If [AuthenticationMS, 8071,
+                !If [EurekaMS, 8761,
+                !If [OrchestratorMS, 8080, 
+                80]]]]]
+              Protocol: tcp
+          Environment:
+            - Name: APPLICATION_NAME
+              Value: !Sub ${ApplicationName}
+            - Name: APPLICATION_ENVIRONMENT
+              Value: !Ref ApplicationEnvironment
+            - Name: AWS_REGION
+              Value: !Ref AWS::Region
+            - Name: DB_URL
+              Value: !Ref DBUrl
+            - Name: DB_USERNAME
+              Value: !Ref DBUsername
+            - Name: DB_PASSWORD
+              Value: !Ref DBPassword
+          Essential: true
+          Memory: 2048
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Sub /ecs/smoothstack/${ApplicationName}/${ApplicationEnvironment}
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+              awslogs-create-group: "true"
+
+  #Role with permissions that a task needs to do its job e.g. kinesis read, dynamo r/w, cloudwatch metrics
+  TaskPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub 'ECS-TaskPolicy-${ApplicationName}-${ApplicationEnvironment}'
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          # Cloudwatch monitoring
+          - Effect: Allow
+            Action:
+              - cloudwatch:PutMetricData
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              - logs:DescribeLogStreams
+            Resource:
+              - arn:aws:logs:*:*
+      Roles:
+        - !Ref TaskExecutionRole
+    
