@@ -35,13 +35,15 @@ pipeline {
                 echo 'Building..'
 
                 script {
-                    sh "git submodule init"
+                    sh 'git submodule init'
+                    /* groovylint-disable-next-line LineLength */
                     sh "sed -i 's,git@github.com:UtopiaCaid/utopia-entities.git,https://github.com/UtopiaCaid/utopia-entities.git,;' .gitmodules"
+                    /* groovylint-disable-next-line LineLength */
                     sh "sed -i 's,git@github.com:UtopiaCaid/utopia-entities.git,https://github.com/UtopiaCaid/utopia-entities.git,' .git/config" 
-                    sh "cat .gitmodules"
-                    sh "cat .git/config"
+                    sh 'cat .gitmodules'
+                    sh 'cat .git/config'
                     sh 'git submodule update'
-                    sh "mvn clean package -DskipTests"
+                    sh 'mvn clean package -DskipTests'
                 }
             }
         }
