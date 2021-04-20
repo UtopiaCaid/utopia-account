@@ -24,6 +24,8 @@ pipeline {
         UTOPIA_PRIVATE_SUBNET_1 = "${sh(script:'echo $AWS_SECRET_VPC | jq -r \'. | .UTOPIA_PRIVATE_SUBNET_1 \'', returnStdout: true)}"
         /* groovylint-disable-next-line LineLength */
         UTOPIA_PUBLIC_VPC_ID = "${sh(script:'echo $AWS_SECRET_VPC | jq -r \'. | .UTOPIA_PUBLIC_VPC_ID \'', returnStdout: true)}"
+        /* groovylint-disable-next-line LineLength */
+        UTOPIA_APPLICATION_LB_DNS = "${sh(script:'echo $AWS_SECRET_VPC | jq -r \'. | .UTOPIA_APPLICATION_LB_DNS \'', returnStdout: true)}"
 
     }
     tools {

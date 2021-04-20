@@ -136,7 +136,7 @@ public class AccountService {
 			throw new AuthorizationException();
 		HttpEntity<Account> entity = new HttpEntity<Account>(headers);
 		ResponseEntity<Account> accountResponseEntity = restTemplate
-				.exchange("http://utopiaauthentication/authentication", HttpMethod.GET, entity, Account.class);
+				.exchange("http://${message.utopia.alb.dns}/authentication", HttpMethod.GET, entity, Account.class);
 //		Check for role then return account if role is admin or is user and the id matched with that of the jwtToken
 		Account loggedInAccount = accountResponseEntity.getBody();
 		logger.info("getLoggedInAccountByJWT: Account making the request: {}, ", loggedInAccount.getUsername());
