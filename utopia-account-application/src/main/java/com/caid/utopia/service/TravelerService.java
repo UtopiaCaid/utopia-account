@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -35,6 +36,9 @@ public class TravelerService {
 
 	@Autowired
 	RestTemplate restTemplate;
+
+	@Value("${message.utopia.alb.dns}")
+	private String dnsUrl;
 
 	public List<Traveler> getTravelersForAccount(Integer accountNumber, String jwtToken) {
 		// TODO Auto-generated method stub
@@ -94,8 +98,8 @@ public class TravelerService {
 		if (!jwtToken.contains("Bearer"))
 			throw new AuthorizationException();
 		HttpEntity<Account> entity = new HttpEntity<Account>(headers);
-		ResponseEntity<Account> accountResponseEntity = restTemplate
-				.exchange("http://${message.utopia.alb.dns}/authentication", HttpMethod.GET, entity, Account.class);
+		ResponseEntity<Account> accountResponseEntity = restTemplate.exchange("http://" + dnsUrl + "/authentication",
+				HttpMethod.GET, entity, Account.class);
 //		Check for role then return account if role is admin or is user and the id matched with that of the jwtToken
 		Account loggedInAccount = accountResponseEntity.getBody();
 		logger.info("getLoggedInAccountByJWT: Account making the request: {}, ", loggedInAccount.getUsername());
